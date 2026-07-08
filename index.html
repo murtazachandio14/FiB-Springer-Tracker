@@ -315,6 +315,7 @@
   <button onclick="tab('list',this)"><span>📋</span>Shifts</button>
   <button onclick="tab('month',this)"><span>📊</span>Month</button>
   <button onclick="tab('year',this)"><span>📅</span>Year</button>
+  <button id="navSync" onclick="gSyncNow()"><span>↻</span>Sync</button>
   <button onclick="tab('set',this)"><span>⚙️</span>Settings</button>
 </nav>
 
@@ -1427,6 +1428,14 @@ function drawCal(){
 const cloud = { on:false, calId:null, gapiReady:false, tokenClient:null, busy:false };
 let lastPull = 0;
 function gPullThrottled(){ if(cloud.on && !cloud.busy && Date.now()-lastPull > 15000) gPull(); }
+async function gSyncNow(){
+  if(!cloud.on){ toast("Not connected — open Settings → Connect Google Calendar"); return; }
+  const b=$("navSync"); if(b) b.querySelector("span").textContent="⏳";
+  toast("↻ Syncing with Google Calendar…");
+  await gPull();
+  if(b) b.querySelector("span").textContent="↻";
+  toast(`✓ Synced — ${shifts.length} shifts`);
+}
 // pull calendar-side changes whenever the app regains focus / becomes visible, and every 3 min while open
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) gPullThrottled(); });
 window.addEventListener("focus", gPullThrottled);
