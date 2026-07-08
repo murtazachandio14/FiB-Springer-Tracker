@@ -1425,16 +1425,27 @@ function drawCal(){
 
 // ================= CLOUD SYNC (Google Calendar as shared backend) =================
 const cloud = { on:false, calId:null, gapiReady:false, tokenClient:null, busy:false };
+let lastPull = 0;
+function gPullThrottled(){ if(cloud.on && !cloud.busy && Date.now()-lastPull > 15000) gPull(); }
+// pull calendar-side changes whenever the app regains focus / becomes visible, and every 3 min while open
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) gPullThrottled(); });
+window.addEventListener("focus", gPullThrottled);
+setInterval(gPullThrottled, 180000);
 if(S.googleClientId===undefined) S.googleClientId = "";
 if(S.googleCalId===undefined) S.googleCalId = "";
 function saveClientId(){ S.googleClientId = $("gClientId").value.trim(); persistS(); }
 function syncStatus(msg, ok){ const el=$("syncStatus"); if(el){ el.innerHTML = msg; el.style.color = ok===true?"#2e7d32":ok===false?"#c0392b":"#888"; } }
 
+// Google Calendar event colours (colorId): 7=Peacock(blue)=planned · 6=Tangerine(orange)=on-request
+const COLOR_PLAN = "7", COLOR_ONREQ = "6";
+// a shift is "on request" (spontaneous) when it was NOT part of the imported monthly plan
+function isOnRequest(s){ return s.src!=="plan"; }
 // build a Google Calendar event from a shift (Berlin wall-clock, tz-safe)
 function evResource(s){
   const a = analyse(s);
   const cust = s.kunde || (isUmbrella(s)?"Bereitschaft":"");
-  const mark = underUmbrella(s)?" (under standby)":(a.ueb||isTakeover(s.art))?" (on-call)":"";
+  const onReq = isOnRequest(s);
+  const mark = onReq ? ` — on request${s.boss?` (${s.boss})`:""}` : underUmbrella(s)?" (under standby)":"";
   const summary = `${empName(s.emp)} · ${s.art}${cust?" "+cust:""}${mark}`;
   let start, end;
   if(s.art==="U"||s.art==="K"){ start={date:s.date}; end={date:addDays(s.date,1)}; }
@@ -1443,10 +1454,29 @@ function evResource(s){
     start={ dateTime:`${s.date}T${s.von}:00`, timeZone:"Europe/Berlin" };
     end={ dateTime:`${endDate}T${s.bis}:00`, timeZone:"Europe/Berlin" };
   }
-  const desc = [`Credited ${a.credit.toFixed(2)} h`, s.boss?`Called by ${s.boss}`:"", s.km?`${s.km} km · ${s.min||0} min`:"", (s.note&&s.note!=="from plan")?s.note:""].filter(Boolean).join(" · ");
-  return { summary, start, end, description:desc, extendedProperties:{ private:{ fibShift:JSON.stringify(stripShift(s)), fibId:slotKey(s) } } };
+  const desc = [`Credited ${a.credit.toFixed(2)} h`, s.boss?`Called by ${s.boss}`:"", s.km?`${s.km} km · ${s.min||0} min`:"", (s.note&&s.note!=="from plan"&&s.note!=="from calendar")?s.note:""].filter(Boolean).join(" · ");
+  return { summary, start, end, description:desc, colorId: onReq?COLOR_ONREQ:COLOR_PLAN,
+           extendedProperties:{ private:{ fibShift:JSON.stringify(stripShift(s)), fibId:slotKey(s) } } };
 }
 function stripShift(s){ const {gcalId, ...rest}=s; return rest; }   // don't store the event id inside itself
+// read wall-clock date/times from a live event (captures edits made in Google Calendar)
+function evTimes(ev){
+  if(ev.start.date) return { date:ev.start.date, von:"00:00", bis:"00:00", allday:true };
+  const s=ev.start.dateTime||"", e=ev.end.dateTime||"";
+  return { date:s.slice(0,10), von:s.slice(11,16), bis:e.slice(11,16), allday:false };
+}
+// build a shift from an event the user created/copied directly in Google Calendar (no stored data)
+function shiftFromSummary(ev){
+  const t = evTimes(ev);
+  let body = (ev.summary||"").split(" · ").pop().replace(/ — on request.*$/i,"").replace(/\(under standby\)/i,"").trim();
+  let art="EZ", kunde=body;
+  const m = body.match(/^([A-Za-zÄÖÜäöü0-9\-]+)\s+(.+)$/);
+  if(m && Object.keys(S.credit).some(k=>k.toLowerCase()===m[1].toLowerCase())){ art=m[1]; kunde=m[2]; }
+  let emp="fib"; const pre=(ev.summary||"").split(" · ")[0].trim();
+  const e=S.employers.find(x=>x.name===pre); if(e) emp=e.id;
+  return { emp, date:t.date, von:t.von, bis:t.bis, art, kunde, boss:"", km:0, min:0,
+           ueb:"auto", note:"from calendar", src:"calendar", gcalId:ev.id };
+}
 function shiftFromEvent(ev){
   const p = ev.extendedProperties && ev.extendedProperties.private;
   if(!p || !p.fibShift) return null;
@@ -1507,23 +1537,42 @@ async function gPull(){
   try{
     await ensureCalendar();
     const evs = await listAllEvents();
-    const cloudShifts = [], cloudSlots = new Set();
+    const result = [], seenSlots = new Set();
+    const writeBack = [];   // events created/edited in the calendar → push proper data + colour back
+    // the calendar is the source of truth: deletions & edits made there flow into the app
     for(const ev of evs){
-      const s = shiftFromEvent(ev); if(!s) continue;
+      let s = shiftFromEvent(ev);              // app-created (has stored data)?
+      const t = evTimes(ev);
+      if(s){
+        // adopt any date/time change made directly in Google Calendar
+        if(!(s.art==="U"||s.art==="K") && (s.date!==t.date||s.von!==t.von||s.bis!==t.bis)){
+          s.date=t.date; s.von=t.von; s.bis=t.bis; writeBack.push(s);   // resync stored data + colour
+        }
+      } else {
+        s = shiftFromSummary(ev);              // user created/copied it in the calendar
+        writeBack.push(s);
+      }
       const k = slotKey(s);
-      if(cloudSlots.has(k)){ try{ await gapi.client.calendar.events.delete({calendarId:cloud.calId, eventId:ev.id}); }catch(e){} continue; }  // drop duplicate event
-      cloudSlots.add(k); cloudShifts.push(s);
+      if(seenSlots.has(k)){ try{ await gapi.client.calendar.events.delete({calendarId:cloud.calId, eventId:ev.id}); }catch(e){} continue; }
+      seenSlots.add(k); result.push(s);
     }
-    // upload local shifts that aren't in the cloud yet (first-time sync from this device)
-    const localOnly = shifts.filter(s=> !cloudSlots.has(slotKey(s)));
-    for(const s of localOnly){ const r=await gapi.client.calendar.events.insert({calendarId:cloud.calId, resource:evResource(s)}); s.gcalId=r.result.id; cloudShifts.push(s); cloudSlots.add(slotKey(s)); }
-    shifts = cloudShifts;
+    // upload local shifts that were never synced (new on this device, no event yet)
+    for(const s of shifts){
+      if(s.gcalId) continue;                    // had an event; if it's gone from cloud it was deleted there → drop
+      if(seenSlots.has(slotKey(s))) continue;
+      const r=await gapi.client.calendar.events.insert({calendarId:cloud.calId, resource:evResource(s)});
+      s.gcalId=r.result.id; result.push(s); seenSlots.add(slotKey(s));
+    }
+    shifts = result;
     // settings shared via the calendar description
     const cal = await gapi.client.calendar.calendars.get({calendarId:cloud.calId});
     const d = (cal.result.description||"");
     if(d.startsWith("FIBSET:")){ try{ const cs=JSON.parse(d.slice(7)); Object.assign(S, cs); S.googleClientId=cs.googleClientId||S.googleClientId; persistS(); }catch(e){} }
     else { await cloudPushSettings(); }
+    lastPull = Date.now();
     save(); fillSelects(); renderSettings(); render();
+    // give calendar-side new/edited events their proper stored data + colour
+    for(const s of writeBack){ try{ const r=await gapi.client.calendar.events.update({calendarId:cloud.calId, eventId:s.gcalId, resource:evResource(s)}); }catch(e){} }
     syncStatus(`✓ Synced — ${shifts.length} shifts. Live in your “FiB Shifts” Google Calendar.`, true);
   }catch(e){ syncStatus("Sync error: "+(e.message||e), false); }
   cloud.busy=false;
