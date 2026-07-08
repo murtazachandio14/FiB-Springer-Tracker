@@ -7,6 +7,8 @@
 <title>FiB Springer Tracker</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if(window.pdfjsLib){ pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; }</script>
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 <style>
   :root { --red:#c0392b; --green:#2e7d32; --gold:#f0a500; --dark:#222; --bg:#f7f6f2; --card:#fff; }
   * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,'Segoe UI',Arial,sans-serif; }
@@ -193,6 +195,12 @@
     <div id="planResult" class="muted" style="margin-top:8px"></div>
     <button class="btn sm sec" onclick="cleanDupes()">🧹 Remove duplicate entries (fix repeated imports)</button>
   </div>
+  <div class="card">
+    <h2>📅 Export to calendar (.ics)</h2>
+    <p class="muted">Download an .ics file and import it into Google or Apple Calendar. One-time snapshot — re-export after you change shifts (see note).</p>
+    <button class="btn" onclick="exportICS('month')">📅 This month → .ics</button>
+    <button class="btn sec" onclick="exportICS('all')">📅 All shifts → .ics</button>
+  </div>
 </div>
 
 <!-- ============ SHIFTS LIST ============ -->
@@ -272,6 +280,26 @@
   <div class="card"><h2>👥 Customers, km & travel time (round trip)</h2><div id="custForm"></div>
     <div class="row"><input type="text" id="nc-name" placeholder="New customer"><input type="number" id="nc-km" placeholder="km" style="max-width:70px"><input type="number" id="nc-min" placeholder="min" style="max-width:70px"></div>
     <button class="btn sm sec" onclick="addCust()">Add customer</button></div>
+  <div class="card"><h2>☁️ Cloud sync + live Google Calendar</h2>
+    <p class="muted">Sign in with the same Google account on all your devices → your shifts live in your Google Calendar, synced everywhere and shown live in the calendar. One-time setup below.</p>
+    <label>Google OAuth Client ID</label>
+    <input id="gClientId" placeholder="…apps.googleusercontent.com" onchange="saveClientId()">
+    <div style="margin-top:8px">
+      <button class="btn grn" id="btnConnect" onclick="gConnect()">Connect Google Calendar</button>
+      <button class="btn sec" id="btnDisconnect" onclick="gDisconnect()" style="display:none">Disconnect</button>
+      <button class="btn sm sec" id="btnSyncNow" onclick="gPull()" style="display:none">↻ Sync now</button>
+    </div>
+    <div id="syncStatus" class="muted" style="margin-top:8px">Not connected — working offline on this device only.</div>
+    <details style="margin-top:8px"><summary class="muted">One-time setup steps</summary>
+      <ol class="steps">
+        <li>Go to <b>console.cloud.google.com</b> → create a project (e.g. “FiB Tracker”).</li>
+        <li>APIs &amp; Services → <b>Enable APIs</b> → enable <b>Google Calendar API</b>.</li>
+        <li>OAuth consent screen → <b>External</b> → fill app name + your e-mail → add <b>yourself as a Test user</b>.</li>
+        <li>Credentials → Create credentials → <b>OAuth client ID</b> → type <b>Web application</b>.</li>
+        <li>Under “Authorized JavaScript origins” add: <b>https://murtazachandio14.github.io</b></li>
+        <li>Copy the <b>Client ID</b> → paste it in the box above → Save → Connect.</li>
+      </ol></details>
+  </div>
   <div class="card"><h2>🗑 Data</h2>
     <button class="btn sm sec" onclick="backup()">Download backup (JSON)</button>
     <button class="btn sm sec" onclick="document.getElementById('restoreFile').click()">Load backup</button>
@@ -723,13 +751,16 @@ function addShift(){
   empFilter = sh.emp;             // focus the views on the employer you just logged for
   currentMonth = sh.date.slice(0,7);
   if(editIndex!==null){
+    sh.gcalId = shifts[editIndex].gcalId;   // keep the calendar event link on edit
     shifts[editIndex] = sh; save();
     toast("✓ Shift updated");
     $("addInfo").textContent = `Updated ✓ (${sh.art}, ${(sh.ueb==="ja"||sh.art==="DÜ")?"outside plan → +30 %":"regular / inside plan"})`;
+    cloudPush(sh);
     cancelEdit();
   } else {
     shifts.push(sh); save();
     $("addInfo").textContent = `Saved ✓ (${sh.art}, ${(sh.ueb==="ja"||sh.art==="DÜ")?"outside plan → +30 %":"regular / inside plan"})`;
+    cloudPush(sh);
   }
   $("f-note").value="";
   render();
@@ -795,8 +826,9 @@ function importEntries(entries){
     existing.add(ek);
     plan.push({ emp:"fib", ...e });
     const c = matchCustomer(e.kunde);
-    shifts.push({ emp:"fib", date:e.date, von:e.von, bis:e.bis, art:e.art, boss:"", kunde:e.kunde,
-      vg: e.vg, km: 0, min: 0, kmSuggest: c?c[1]:0, ueb:"nein", note:"from plan", src:"plan" });
+    const ns = { emp:"fib", date:e.date, von:e.von, bis:e.bis, art:e.art, boss:"", kunde:e.kunde,
+      vg: e.vg, km: 0, min: 0, kmSuggest: c?c[1]:0, ueb:"nein", note:"from plan", src:"plan" };
+    shifts.push(ns); cloudPush(ns);
     added++;
   }
   save();
@@ -886,18 +918,20 @@ function cleanDupes(){
   render();
 }
 function delShift(i){
+  const gid = shifts[i].gcalId;
   shifts.splice(i,1);
   if(editIndex===i) cancelEdit();
   else if(editIndex!==null && editIndex>i) editIndex--;
-  save(); render();
+  save(); render(); cloudDelete(gid);
 }
 function editKm(i){
   const s = shifts[i];
   const km = prompt(`Round-trip km for ${s.kunde||"this shift"}? ${s.kmSuggest?("(suggestion: "+s.kmSuggest+")"):""}`, s.km || s.kmSuggest || 0);
   if(km===null) return;
   const mn = prompt("Round-trip travel time in minutes?", s.min||0);
-  s.km = Number(km)||0; s.min = Number(mn)||0; save(); render();
+  s.km = Number(km)||0; s.min = Number(mn)||0; save(); render(); cloudPush(s);
 }
+function setBoss(i, v){ shifts[i].boss=v; save(); render(); cloudPush(shifts[i]); }
 
 function empBarHTML(target){
   return S.employers.map(e=>`<button class="${e.id===empFilter?'act':''}" onclick="setEmp('${e.id}')">${e.name}</button>`).join("");
@@ -910,7 +944,7 @@ function render(){
   if($("empBarList")) $("empBarList").innerHTML = empBarHTML();
   const rows = shifts.map((s,i)=>({s,i})).filter(x=>x.s.date.slice(0,7)===m && x.s.emp===empFilter)
     .sort((a,b)=>a.s.date.localeCompare(b.s.date)||a.s.von.localeCompare(b.s.von));
-  let html = "<tr><th>Date</th><th>Time</th><th>Type</th><th>Customer / Notes</th><th>Boss</th><th class='num'>km</th><th></th></tr>";
+  let html = "<tr><th>Date</th><th>Time</th><th>Type</th><th>Customer / Notes</th><th>Called by</th><th class='num'>km</th><th></th></tr>";
   for(const {s,i} of rows){
     const a = analyse(s);
     const pill = s.art==="U"||s.art==="K" ? "p-url" : a.isBer ? "p-ber" : (s.art==="DÜ"||a.ueb) ? "p-ueb" : "p-plan";
@@ -919,7 +953,8 @@ function render(){
     const partial = a.ueb && a.uebH < a.credit-0.01;
     html += `<tr><td>${dateLabel(s)}</td><td>${s.von}–${s.bis}</td>
       <td><span class="pill ${pill}">${s.art}${(a.ueb&&s.art!=="DÜ")?(partial?` +30%(${a.uebH.toFixed(1)}h)`:"+30%"):""}</span>${berTag}</td>
-      <td>${s.kunde||""}${s.note?`<br><span class="muted">${s.note}</span>`:""}</td><td>${s.boss||""}</td>
+      <td>${s.kunde||""}${s.note?`<br><span class="muted">${s.note}</span>`:""}</td>
+      <td>${s.emp==="fib" ? `<select onchange="setBoss(${i},this.value)" style="font-size:11px;padding:3px;border:1px solid #ddd;border-radius:6px"><option value="">— called by —</option>${S.bosses.map(b=>`<option ${s.boss===b?"selected":""}>${b}</option>`).join("")}</select>` : "—"}</td>
       <td class="num">${s.km||""} <a class="del" href="#" onclick="editKm(${i});return false">✎</a></td>
       <td><a class="del" href="#" onclick="editShift(${i});return false" style="color:#3a7ca5">✏️</a> <a class="del" href="#" onclick="delShift(${i});return false">✕</a></td></tr>`;
   }
@@ -1287,7 +1322,7 @@ function renderSettings(){
         <div><label>€/month cap (0=none)</label><input type="number" value="${e.monthCapEUR}" onchange="S.employers[${i}].monthCapEUR=Number(this.value);persistS()"></div></div>
     </div>`).join("");
 }
-function persistS(){ localStorage.setItem("fibSettings", JSON.stringify(S)); }
+function persistS(){ localStorage.setItem("fibSettings", JSON.stringify(S)); if(typeof cloud!=="undefined" && cloud.on) cloudPushSettings(); }
 function saveSettings(){
   S.ratesNew.base=+$("set-nb").value; S.ratesNew.zbase=+$("set-nz").value; S.ratesNew.berNight=+$("set-nber").value;
   S.ratesNew.fix=+$("set-nfix").value; S.ratesNew.zulage=+$("set-nzul").value; S.ratesNew.szulage=+$("set-nszul").value;
@@ -1312,6 +1347,38 @@ function exportCSV(){
   let csv="Employer;Date;From;To;Type;OutsidePlan;Customer;Boss;km;TravelMin;Note\n";
   shifts.filter(s=>s.date.slice(0,7)===m && s.emp===empFilter).forEach(s=>{ csv+=[empName(s.emp),s.date,s.von,s.bis,s.art,s.ueb,s.kunde,s.boss,s.km,s.min||0,(s.note||"").replace(/;/g,",")].join(";")+"\n"; });
   dl(csv, `shifts_${empFilter}_${m}.csv`, "text/csv");
+}
+// ---- calendar export (.ics) for Google/Apple Calendar ----
+function icsStamp(d){ const p=n=>String(n).padStart(2,"0");
+  return d.getUTCFullYear()+p(d.getUTCMonth()+1)+p(d.getUTCDate())+"T"+p(d.getUTCHours())+p(d.getUTCMinutes())+"00Z"; }
+function icsEsc(t){ return String(t||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n"); }
+function exportICS(scope){   // scope: "month" (current month+employer) or "all"
+  const pool = scope==="all" ? shifts : shifts.filter(s=>s.date.slice(0,7)===currentMonth && s.emp===empFilter);
+  if(!pool.length){ toast("No shifts to export"); return; }
+  const stamp = icsStamp(new Date());
+  let ev="";
+  for(const s of pool){
+    const a = analyse(s);
+    let dtstart, dtend;
+    if(s.art==="U"||s.art==="K"){
+      dtstart=`DTSTART;VALUE=DATE:${s.date.replace(/-/g,"")}`;
+      dtend=`DTEND;VALUE=DATE:${addDays(s.date,1).replace(/-/g,"")}`;
+    } else {
+      const st=new Date(`${s.date}T${s.von}:00`);
+      const en=new Date(st.getTime()+dur(s.von,s.bis)*3600000);
+      dtstart=`DTSTART:${icsStamp(st)}`; dtend=`DTEND:${icsStamp(en)}`;
+    }
+    const cust = s.kunde || (isUmbrella(s)?"Bereitschaft":"");
+    const mark = underUmbrella(s)?" (under standby)":(a.ueb||isTakeover(s.art))?" (on-call +30%)":"";
+    const sum = icsEsc(`${empName(s.emp)} · ${s.art}${cust?" "+cust:""}${mark}`);
+    const desc = icsEsc([`Credited: ${a.credit.toFixed(2)} h`, s.boss?`Called by: ${s.boss}`:"",
+      s.km?`Drive: ${s.km} km · ${s.min||0} min`:"", (s.note&&s.note!=="from plan")?`Note: ${s.note}`:""].filter(Boolean).join("\n"));
+    const uid = "fib-"+slotKey(s).replace(/[^a-z0-9]/gi,"")+"@tracker";
+    ev += `BEGIN:VEVENT\r\nUID:${uid}\r\nDTSTAMP:${stamp}\r\n${dtstart}\r\n${dtend}\r\nSUMMARY:${sum}\r\nDESCRIPTION:${desc}\r\nEND:VEVENT\r\n`;
+  }
+  const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//FiB Springer Tracker//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n${ev}END:VCALENDAR\r\n`;
+  dl(ics, scope==="all"?"FiB_all_shifts.ics":`FiB_${empFilter}_${currentMonth}.ics`, "text/calendar");
+  toast(`✓ ${pool.length} shifts exported to calendar`);
 }
 function backup(){ dl(JSON.stringify({S,shifts,plan}), "FiB_backup.json", "application/json"); }
 function restore(inp){ const fr=new FileReader(); fr.onload=e=>{ const d=JSON.parse(e.target.result); S=d.S; shifts=d.shifts; plan=d.plan||[]; persistS(); save(); location.reload(); }; fr.readAsText(inp.files[0]); }
@@ -1356,11 +1423,133 @@ function drawCal(){
   $("calGrid").innerHTML = html;
 }
 
+// ================= CLOUD SYNC (Google Calendar as shared backend) =================
+const cloud = { on:false, calId:null, gapiReady:false, tokenClient:null, busy:false };
+if(S.googleClientId===undefined) S.googleClientId = "";
+if(S.googleCalId===undefined) S.googleCalId = "";
+function saveClientId(){ S.googleClientId = $("gClientId").value.trim(); persistS(); }
+function syncStatus(msg, ok){ const el=$("syncStatus"); if(el){ el.innerHTML = msg; el.style.color = ok===true?"#2e7d32":ok===false?"#c0392b":"#888"; } }
+
+// build a Google Calendar event from a shift (Berlin wall-clock, tz-safe)
+function evResource(s){
+  const a = analyse(s);
+  const cust = s.kunde || (isUmbrella(s)?"Bereitschaft":"");
+  const mark = underUmbrella(s)?" (under standby)":(a.ueb||isTakeover(s.art))?" (on-call)":"";
+  const summary = `${empName(s.emp)} · ${s.art}${cust?" "+cust:""}${mark}`;
+  let start, end;
+  if(s.art==="U"||s.art==="K"){ start={date:s.date}; end={date:addDays(s.date,1)}; }
+  else {
+    const endDate = (toMin(s.bis)<=toMin(s.von)) ? addDays(s.date,1) : s.date;
+    start={ dateTime:`${s.date}T${s.von}:00`, timeZone:"Europe/Berlin" };
+    end={ dateTime:`${endDate}T${s.bis}:00`, timeZone:"Europe/Berlin" };
+  }
+  const desc = [`Credited ${a.credit.toFixed(2)} h`, s.boss?`Called by ${s.boss}`:"", s.km?`${s.km} km · ${s.min||0} min`:"", (s.note&&s.note!=="from plan")?s.note:""].filter(Boolean).join(" · ");
+  return { summary, start, end, description:desc, extendedProperties:{ private:{ fibShift:JSON.stringify(stripShift(s)), fibId:slotKey(s) } } };
+}
+function stripShift(s){ const {gcalId, ...rest}=s; return rest; }   // don't store the event id inside itself
+function shiftFromEvent(ev){
+  const p = ev.extendedProperties && ev.extendedProperties.private;
+  if(!p || !p.fibShift) return null;
+  try{ const s=JSON.parse(p.fibShift); s.gcalId=ev.id; return s; }catch(e){ return null; }
+}
+
+function gConnect(){
+  const cid = (S.googleClientId||$("gClientId").value||"").trim();
+  if(!cid){ alert("Paste your Google OAuth Client ID first (see setup steps)."); return; }
+  S.googleClientId = cid; persistS();
+  if(typeof google==="undefined" || typeof gapi==="undefined"){ syncStatus("Google libraries not loaded — check internet, reload.", false); return; }
+  syncStatus("Connecting…");
+  gapi.load("client", async ()=>{
+    try{
+      await gapi.client.init({ discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"] });
+      cloud.gapiReady = true;
+      cloud.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: cid,
+        scope: "https://www.googleapis.com/auth/calendar",
+        callback: async (resp)=>{
+          if(resp.error){ syncStatus("Sign-in failed: "+resp.error, false); return; }
+          gapi.client.setToken(resp);
+          localStorage.setItem("fibG","1");
+          await ensureCalendar();
+          await gPull();
+          cloud.on = true;
+          $("btnConnect").style.display="none"; $("btnDisconnect").style.display="inline-block"; $("btnSyncNow").style.display="inline-block";
+        }
+      });
+      cloud.tokenClient.requestAccessToken({ prompt: localStorage.getItem("fibG")?"":"consent" });
+    }catch(e){ syncStatus("Setup error: "+(e.message||e), false); }
+  });
+}
+function gDisconnect(){
+  const t=gapi.client.getToken(); if(t){ google.accounts.oauth2.revoke(t.access_token, ()=>{}); gapi.client.setToken(null); }
+  cloud.on=false; localStorage.removeItem("fibG");
+  $("btnConnect").style.display="inline-block"; $("btnDisconnect").style.display="none"; $("btnSyncNow").style.display="none";
+  syncStatus("Disconnected — offline on this device only.");
+}
+async function ensureCalendar(){
+  if(S.googleCalId){ cloud.calId=S.googleCalId; try{ await gapi.client.calendar.calendars.get({calendarId:cloud.calId}); return; }catch(e){ /* deleted → recreate */ } }
+  const list = await gapi.client.calendar.calendarList.list({maxResults:250});
+  const found = (list.result.items||[]).find(c=>c.summary==="FiB Shifts");
+  if(found){ cloud.calId=found.id; }
+  else { const c=await gapi.client.calendar.calendars.insert({resource:{summary:"FiB Shifts", timeZone:"Europe/Berlin"}}); cloud.calId=c.result.id; }
+  S.googleCalId=cloud.calId; persistS();
+}
+async function listAllEvents(){
+  let items=[], pageToken;
+  do{
+    const r = await gapi.client.calendar.events.list({calendarId:cloud.calId, maxResults:2500, showDeleted:false, singleEvents:true, pageToken});
+    items = items.concat(r.result.items||[]); pageToken = r.result.nextPageToken;
+  } while(pageToken);
+  return items;
+}
+async function gPull(){
+  if(cloud.busy) return; cloud.busy=true; syncStatus("Syncing…");
+  try{
+    await ensureCalendar();
+    const evs = await listAllEvents();
+    const cloudShifts = [], cloudSlots = new Set();
+    for(const ev of evs){
+      const s = shiftFromEvent(ev); if(!s) continue;
+      const k = slotKey(s);
+      if(cloudSlots.has(k)){ try{ await gapi.client.calendar.events.delete({calendarId:cloud.calId, eventId:ev.id}); }catch(e){} continue; }  // drop duplicate event
+      cloudSlots.add(k); cloudShifts.push(s);
+    }
+    // upload local shifts that aren't in the cloud yet (first-time sync from this device)
+    const localOnly = shifts.filter(s=> !cloudSlots.has(slotKey(s)));
+    for(const s of localOnly){ const r=await gapi.client.calendar.events.insert({calendarId:cloud.calId, resource:evResource(s)}); s.gcalId=r.result.id; cloudShifts.push(s); cloudSlots.add(slotKey(s)); }
+    shifts = cloudShifts;
+    // settings shared via the calendar description
+    const cal = await gapi.client.calendar.calendars.get({calendarId:cloud.calId});
+    const d = (cal.result.description||"");
+    if(d.startsWith("FIBSET:")){ try{ const cs=JSON.parse(d.slice(7)); Object.assign(S, cs); S.googleClientId=cs.googleClientId||S.googleClientId; persistS(); }catch(e){} }
+    else { await cloudPushSettings(); }
+    save(); fillSelects(); renderSettings(); render();
+    syncStatus(`✓ Synced — ${shifts.length} shifts. Live in your “FiB Shifts” Google Calendar.`, true);
+  }catch(e){ syncStatus("Sync error: "+(e.message||e), false); }
+  cloud.busy=false;
+}
+async function cloudPush(s){
+  if(!cloud.on) return;
+  try{
+    if(s.gcalId){ await gapi.client.calendar.events.update({calendarId:cloud.calId, eventId:s.gcalId, resource:evResource(s)}); }
+    else { const r=await gapi.client.calendar.events.insert({calendarId:cloud.calId, resource:evResource(s)}); s.gcalId=r.result.id; save(); }
+  }catch(e){ syncStatus("Push failed (will retry on Sync now): "+(e.message||e), false); }
+}
+async function cloudDelete(gcalId){ if(!cloud.on||!gcalId) return; try{ await gapi.client.calendar.events.delete({calendarId:cloud.calId, eventId:gcalId}); }catch(e){} }
+let _setTimer=null;
+function cloudPushSettings(){ if(!cloud.on && !cloud.calId) return Promise.resolve();
+  clearTimeout(_setTimer);
+  return new Promise(res=>{ _setTimer=setTimeout(async ()=>{ try{ await gapi.client.calendar.calendars.patch({calendarId:cloud.calId, resource:{description:"FIBSET:"+JSON.stringify(S)}}); }catch(e){} res(); }, 800); });
+}
+
 // init
 $("f-date").value = new Date().toISOString().slice(0,10);
 $("yearScope").value = "fib";
+if($("gClientId")) $("gClientId").value = S.googleClientId||"";
 fillSelects(); renderSettings(); setMonth(currentMonth); drawCal();
 window.__ready = true;
+// auto-reconnect if this device connected before
+if(S.googleClientId && localStorage.getItem("fibG")){ setTimeout(gConnect, 800); }
 </script>
 </body>
 </html>
