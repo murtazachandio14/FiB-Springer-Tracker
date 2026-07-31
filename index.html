@@ -107,6 +107,71 @@
     #printArea table { display:table; } #printArea tr { display:table-row; } #printArea td, #printArea th { display:table-cell; border-bottom:1px solid #ccc; padding:4px 6px; font-size:11px; }
     #printArea h1 { font-size:18px; margin-bottom:2px; } #printArea h2 { font-size:14px; margin:12px 0 4px; } #printArea p { font-size:11px; }
   }
+  /* ===== Live shift tracker (Phase 1) ===== */
+  .live-wrap { margin-bottom:12px; }
+  .live-active { border-left:6px solid var(--green); background:linear-gradient(#f3fbf4,#fff); }
+  .live-next   { border-left:6px solid var(--gold);  background:linear-gradient(#fff9ea,#fff); }
+  .live-none   { border-left:6px solid #cfcfcf; }
+  .live-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .live-cust { font-size:18px; font-weight:800; line-height:1.15; }
+  .live-meta { font-size:12px; color:#5a5a5a; margin:2px 0; }
+  .live-timer { font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--green); letter-spacing:.5px; }
+  .live-count { font-size:20px; font-weight:800; color:#b06a00; font-variant-numeric:tabular-nums; }
+  .st-pill { display:inline-block; padding:2px 9px; border-radius:99px; font-size:10px; font-weight:800; letter-spacing:.3px; }
+  .st-active { background:#2e7d32; color:#fff; } .st-due { background:var(--gold); color:#3a2c00; }
+  .st-queued { background:#e5e7eb; color:#374151; } .st-journey { background:#3a7ca5; color:#fff; }
+  .qitem { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 10px; border:1px solid #eee; border-radius:10px; margin-top:7px; background:#fff; }
+  .qitem .qinfo b { font-size:13.5px; } .qitem .qinfo span { font-size:11px; color:#777; display:block; }
+  .qitem .qbtns { white-space:nowrap; text-align:right; }
+  .btn.tiny { padding:6px 10px; font-size:12px; width:auto; display:inline-block; margin:2px 2px 0 0; }
+  .btn.ghost { background:#fff; color:#444; border:1px solid #ccc; }
+  .reviewbox { background:#fafafa; border:1px dashed #bbb; border-radius:10px; padding:12px; margin-top:10px; }
+  .pa-grid { display:grid; grid-template-columns:auto 1fr 1fr; gap:4px 12px; font-size:12.5px; margin:6px 0; }
+  .pa-grid .h { color:#888; font-weight:700; } .pa-grid .l { color:#666; }
+  .flash { animation:flashbg 2.5s ease; }
+  @keyframes flashbg { 0%{ background:#fff7cc; } 100%{ background:#fff; } }
+  /* ===== Real mobile Log layout ===== */
+  @media (max-width:640px){
+    .split { flex-direction:column; }
+    .split .colL, .split .colR { flex:1 1 100%; width:100%; }
+    .split .colR { position:static; top:auto; }
+    .split .colL .card, .split .colR .card { padding:12px; }
+    .split .colL label { font-size:12px; margin:8px 0 2px; }
+    .split .colL input, .split .colL select, .split .colL textarea { padding:11px; font-size:15px; }
+    .split .cal-day { font-size:13px; padding:7px 0 10px; }
+    .split .cal-grid { gap:3px; } .split .cal-head b { font-size:14px; }
+    .mini-list { max-height:none; }
+    .mini-item { font-size:12px; } .mini-item b { font-size:13px; } .mini-item .mi-row{ flex-wrap:wrap; }
+    .live-timer { font-size:26px; } .live-cust { font-size:16px; }
+    .row.stackable { flex-direction:column; gap:0; }
+  }
+  /* ===== Denser desktop Log layout (use the width, keep Start/Save in view) ===== */
+  @media (min-width:900px){
+    #tab-add { max-width:1120px; }
+    #tab-add .split .colL { flex:1 1 62%; }
+    #tab-add .split .colR { flex:1 1 38%; }
+    #tab-add .split .colL input, #tab-add .split .colL select { padding:8px 7px; font-size:13.5px; }
+    #tab-add .split .colL label { font-size:11px; }
+    #tab-add .cal-day { font-size:12px; padding:6px 0 9px; }
+  }
+  /* ===== Reports dashboard ===== */
+  #tab-list { max-width:1180px; }
+  #shiftTable tr:nth-child(even) td { background:#dbe1e8; }   /* zebra grey (prominent) */
+  #shiftTable tr:nth-child(odd)  td { background:#fff; }       /* zebra white */
+  @media print { #printArea tr:nth-child(even) td, #printArea tr:nth-child(even) th { background:#dcdcdc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  #shiftTable td, #shiftTable th { font-size:11px; padding:6px 5px; }
+  #shiftTable th.num, #shiftTable td.num { text-align:right; }
+  td.acc-ber  { border-left:4px solid #e8850c; } td.acc-out  { border-left:4px solid #c0392b; }
+  td.acc-url  { border-left:4px solid #9c8ade; } td.acc-plan { border-left:4px solid #2e7d32; }
+  td.acc-child{ border-left:4px solid #3a7ca5; }
+  .child { color:#3a7ca5; font-weight:800; }
+  .repfilter { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .repfilter select, .repfilter input { padding:6px 8px; font-size:12px; width:auto; flex:0 1 auto; }
+  .cmp-add { color:#2e7d32; } .cmp-del { color:#c0392b; text-decoration:line-through; } .cmp-chg { color:#b06a00; }
+  @media (max-width:640px){
+    #shiftTable { display:block; overflow-x:auto; white-space:nowrap; }
+    #shiftTable td, #shiftTable th { padding:5px 4px; font-size:11px; }
+  }
 </style>
 </head>
 <body>
@@ -115,6 +180,7 @@
 
 <!-- ============ QUICK ADD ============ -->
 <div class="tab act" id="tab-add">
+  <div id="liveCard"></div>
   <div class="split">
     <div class="colL">
       <div class="card cal">
@@ -169,8 +235,11 @@
             <select id="f-ueb"><option value="auto">detect automatically</option><option value="ja">yes (+30 %)</option><option value="nein">no</option></select></div>
           <div><label>Note / reminder (shows on your report)</label><input type="text" id="f-note" placeholder="e.g. team meeting, called en route…"></div>
         </div>
-        <button class="btn" id="btnSaveShift" onclick="addShift()">Save shift</button>
+        <div class="row"><button class="btn grn" onclick="startFromForm()">▶ Start shift now</button>
+          <button class="btn ghost" onclick="queueFromForm()">📋 Queue upcoming</button></div>
+        <button class="btn" id="btnSaveShift" onclick="addShift()">Save shift (already finished)</button>
         <div class="muted" id="addInfo" style="margin-top:6px"></div>
+        <div class="muted" style="margin-top:6px">▶ <b>Start</b> = track a shift live (timer survives refresh) · 📋 <b>Queue</b> = plan a later shift while one is running · <b>Save</b> = log a shift you already finished.</div>
       </div>
     </div>
     <div class="colR">
@@ -187,6 +256,15 @@
   <div class="card">
     <h2>📄 Import your monthly SOLL plan</h2>
     <p class="muted">Everything imported here counts as <b>planned</b>. Anything you log later outside these windows is auto-flagged as <b>Übernahme (+30 %)</b>.</p>
+    <div style="margin:6px 0 10px;background:#fff9ea;border-radius:8px;padding:8px 10px">
+      <label style="display:inline;font-weight:600">Import this schedule as: </label>
+      <select id="planVersionSel" style="width:auto;display:inline;padding:6px 8px;font-size:13px">
+        <option value="auto">Auto — SOLL Plan first, then Revised</option>
+        <option value="SOLL Plan">SOLL Plan (the original for the month)</option>
+        <option value="Revised">Revised (adds Revision 1, 2, …)</option>
+      </select>
+      <div class="muted" style="margin-top:3px">The first import of a month = <b>SOLL Plan</b>; later corrected schedules = <b>Revised</b>. Every version is kept (see “Schedule versions” below).</div>
+    </div>
     <h3>Best: upload the PDF directly (never misses a shift)</h3>
     <p class="muted">The app reads the PDF's real text itself, so nothing depends on copy-paste. Needs internet the first time (to load the PDF reader); after that it's cached.</p>
     <input type="file" id="planPdf" accept="application/pdf,.pdf" onchange="importPdf(this)">
@@ -199,8 +277,14 @@
     <textarea id="planText" placeholder="Paste the plan text here… lines like: Sa 04.07.2026 08:00 - 13:30 EZFU Springerbereitschaft, Gladenbach 5,5 5,5" oninput="resetImportBtns()"></textarea>
     <button class="btn" id="btnImport" onclick="importPlan()">Import plan</button>
     <button class="btn grn" id="btnJuly" onclick="loadJuly()">⚡ Load built-in plan: July 2026</button>
+    <button class="btn sec" onclick="loadAugSoll()">⚡ Load August SOLL plan (base)</button>
+    <button class="btn sec" onclick="loadAugRevised()">⚡ Load August REVISED (adds +30 % takeovers)</button>
     <div id="planResult" class="muted" style="margin-top:8px"></div>
     <button class="btn sm sec" onclick="cleanDupes()">🧹 Remove duplicate entries (fix repeated imports)</button>
+  </div>
+  <div class="card">
+    <h2>🗂️ Schedule versions (Soll Plan &amp; revisions)</h2>
+    <div id="planVersions"></div>
   </div>
   <div class="card">
     <h2>📅 Export to calendar (.ics)</h2>
@@ -215,10 +299,12 @@
   <div class="card">
     <h2>📋 Shifts <span class="muted" id="listMonthLabel"></span></h2>
     <div class="empbar" id="empBarList"></div>
+    <div id="leaveBanner"></div>
     <div class="row">
       <div><label>Month</label><input type="month" id="viewMonth" onchange="setMonth(this.value)"></div>
       <div><label>&nbsp;</label><button class="btn sm sec" onclick="exportCSV()">Export CSV</button></div>
     </div>
+    <div class="repfilter" id="repFilters"></div>
     <div style="overflow-x:auto"><table id="shiftTable"></table></div>
     <div style="margin-top:12px;border-top:1px solid #eee;padding-top:10px">
       <button class="btn" onclick="printBoss('boss')">🖨 Boss report (clean)</button>
@@ -356,6 +442,50 @@ const DEF = {
     ["Can Akyigit", 86, 90], ["Weimer Bernd", 30, 50], ["FiB Büro Gladenbach", 30, 50], ["FiB Büro Marburg", 20, 30], ["Other", 0, 0]
   ]
 };
+const AUG_SOLL = `
+Sa 01.08.2026 22:00 - 08:00 NBH40 Springerbereitschaft, Gladenbach 10 4
+So 02.08.2026 12:00 - 20:00 EZH Springerbereitschaft, Gladenbach 8 8
+Mo 03.08.2026 08:00 - 13:30 EZFU Weigand, Jeanne 5,5 5,5
+Fr 07.08.2026 14:00 - 15:00 Team-P Springerbereitschaft, Gladenbach 1 1
+Fr 07.08.2026 22:00 - 08:00 NBH40 Springerbereitschaft, Gladenbach 10 4
+Fr 21.08.2026 22:00 - 08:00 NBH40 Springerbereitschaft, Gladenbach 10 4
+So 23.08.2026 16:00 - 22:00 EZFU Debus, Niklas 6 6
+So 23.08.2026 22:00 - 06:00 NBF40 Debus, Niklas 8 3,2
+Mo 24.08.2026 06:00 - 07:15 EZFU Debus, Niklas 1,25 1,25
+Fr 28.08.2026 22:00 - 08:00 NBH40 Springerbereitschaft, Gladenbach 10 4
+So 30.08.2026 12:00 - 20:00 EZH Springerbereitschaft, Gladenbach 8 8
+`;
+const AUG_REVISED = `
+Mi 29.07.2026 20:30 - 01:00 NB100 Klörner, Markus 4,5 4,5
+Do 30.07.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Do 30.07.2026 02:00 - 07:30 NB100 Klörner, Markus 5,5 5,5
+Do 30.07.2026 17:00 - 22:00 EZH Springerbereitschaft, Gladenbach 5 5
+Do 30.07.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+Fr 31.07.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Fr 31.07.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+Fr 31.07.2026 14:30 - 19:30 EZFA Klörner, Markus 5 5
+Fr 31.07.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+Sa 01.08.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Sa 01.08.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+Sa 01.08.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+So 02.08.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+So 02.08.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+So 02.08.2026 12:00 - 20:00 EZH Springerbereitschaft, Gladenbach 8 8
+Mo 03.08.2026 08:00 - 13:30 EZFU Weigand, Jeanne 5,5 5,5
+Mo 03.08.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+Di 04.08.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Di 04.08.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+Mi 05.08.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+Do 06.08.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Do 06.08.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+Do 06.08.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+Fr 07.08.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Fr 07.08.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+Fr 07.08.2026 14:00 - 15:00 Team-P Springerbereitschaft, Gladenbach 1 1
+Fr 07.08.2026 20:30 - 01:00 NBF100 Klörner, Markus 4,5 4,5
+Sa 08.08.2026 01:00 - 02:00 PBZ100 Klörner, Markus 1 1
+Sa 08.08.2026 02:00 - 07:30 NBF100 Klörner, Markus 5,5 5,5
+`;
 const JULY_PLAN = `Sa 04.07.2026 08:00 - 13:30 EZFU Springerbereitschaft, Gladenbach 5,5 5,5
 So 05.07.2026 10:00 - 19:00 EZH Springerbereitschaft, Gladenbach 9 9
 Sa 11.07.2026 08:00 - 13:30 EZFU Weigand, Jeanne 5,5 5,5
@@ -544,6 +674,64 @@ function standbyRealized(sh){
     return Math.max(st,ost) < Math.min(en,oen);
   });
 }
+// ===== per-shift earned value (Gross) + estimated Net =====
+function shiftPay(s){
+  const a = analyse(s), r = a.r;
+  if(s.art==="U"||s.art==="K") return {gross:0, net:0, a};
+  const E = empById(s.emp||"fib");
+  if(E && E.type==="minijob"){ const g=a.credit*E.wage; return {gross:g, net:g, base:g, uebZ:0, night:0, sat:0, sun:0, hol:0, berN:0, a}; }
+  const base = a.credit * r.base;
+  const uebZ = a.uebH * r.base * r.uebPct/100;
+  const night = (a.isBer?0:a.night) * r.zbase * r.nightPct/100;
+  const sat = a.sat * r.zbase * r.satPct/100;
+  const sun = a.sun * r.zbase * r.sunPct/100;
+  const hol = a.hol * r.zbase * r.holPct/100;
+  const berN = a.isBer ? a.night * r.berNight : 0;
+  const gross = base + uebZ + night + sat + sun + hol + berN;
+  return {gross, net: gross*(S.netFactor||0.80), base, uebZ, night, sat, sun, hol, berN, a};
+}
+// ===== 24h clock disc: green = free time, orange arc = Bereitschaft window, larger red arc = actual assignment =====
+function polarXY(cx,cy,r,min){ const ang=(min/1440)*2*Math.PI - Math.PI/2; return [cx+r*Math.cos(ang), cy+r*Math.sin(ang)]; }
+function arcPath(cx,cy,r,s,e,color,w){ if(e-s<0.5) return ""; const large=(e-s)>720?1:0;
+  const [x1,y1]=polarXY(cx,cy,r,s), [x2,y2]=polarXY(cx,cy,r,e);
+  return `<path d="M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}" stroke="${color}" stroke-width="${w}" fill="none"/>`; }
+function annSector(cx,cy,rIn,rOut,a,b,color){
+  if(b-a<0.5) return "";
+  const large=(b-a)>720?1:0;
+  const [xo1,yo1]=polarXY(cx,cy,rOut,a),[xo2,yo2]=polarXY(cx,cy,rOut,b);
+  const [xi2,yi2]=polarXY(cx,cy,rIn,b),[xi1,yi1]=polarXY(cx,cy,rIn,a);
+  return `<path d="M ${xo1.toFixed(1)} ${yo1.toFixed(1)} A ${rOut} ${rOut} 0 ${large} 1 ${xo2.toFixed(1)} ${yo2.toFixed(1)} L ${xi2.toFixed(1)} ${yi2.toFixed(1)} A ${rIn} ${rIn} 0 ${large} 0 ${xi1.toFixed(1)} ${yi1.toFixed(1)} Z" fill="${color}"/>`;
+}
+function clockTick(cx,cy,rOut,min,txt,color){
+  const m=min%1440; const [x1,y1]=polarXY(cx,cy,rOut,m), [x2,y2]=polarXY(cx,cy,rOut+3,m), [xt,yt]=polarXY(cx,cy,rOut+9,m);
+  return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${color}" stroke-width="1.6"/><text x="${xt.toFixed(1)}" y="${yt.toFixed(1)}" font-size="8" font-weight="700" fill="#111" text-anchor="middle" dominant-baseline="middle">${txt}</text>`;
+}
+// 24h clock: DARK GREEN filled disc = free time; ORANGE band = Bereitschaft window;
+// coloured outer bands = each actual assignment (different colour + name); ticks show boundary times.
+function dayClock(s){
+  const sz=76, cx=38, cy=38, rBase=28, rBin=13, rBout=20, rAin=20, rAout=28;
+  let vs=toMin(s.von), ve=toMin(s.bis); if(ve<=vs) ve+=1440;
+  let g=`<circle cx="${cx}" cy="${cy}" r="${rBase}" fill="#0b5d2e"/><circle cx="${cx}" cy="11" r="1.4" fill="#fff"/>`;
+  const palette=["#ff3b30","#ffd400","#ff2d95","#00e5ff","#ffffff"];
+  const seg=(a,b,fn)=>{ if(b<=1440){ fn(a,b);} else { fn(a,1440); fn(0,b-1440);} };
+  if(s.art==="U"||s.art==="K"){ g+=`<circle cx="${cx}" cy="${cy}" r="${rBase}" fill="#7d5fd0"/>`; }
+  else if(STANDBY.includes(s.art)){
+    seg(vs,ve,(a,b)=>g+=annSector(cx,cy,rBin,rBout,a,b,"#e8850c"));
+    g+=clockTick(cx,cy,rBout,vs,s.von,"#e8850c")+clockTick(cx,cy,rBout,ve,s.bis,"#e8850c");
+    const asg=shifts.filter(o=>o!==s && (o.emp||"fib")===(s.emp||"fib") && WORKED.includes(o.art) && overlapMin(...shiftAbs(o),...shiftAbs(s))>0)
+      .sort((x,y)=>toMin(x.von)-toMin(y.von));
+    asg.forEach((o,idx)=>{ let os=toMin(o.von),oe=toMin(o.bis); if(oe<=os) oe+=1440; const col=palette[idx%palette.length];
+      seg(os,oe,(a,b)=>g+=annSector(cx,cy,rAin,rAout,a,b,col));
+      const [lx,ly]=polarXY(cx,cy,(rAin+rAout)/2,((os+oe)/2)%1440);
+      g+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" font-size="7" font-weight="700" fill="#111" text-anchor="middle" dominant-baseline="middle">${esc((o.kunde||o.art).slice(0,4))}</text>`;
+    });
+  } else {
+    const col = (s.art==="DÜ"||s.takeover||analyse(s).ueb) ? "#ff3b30" : "#f39c12";
+    seg(vs,ve,(a,b)=>g+=annSector(cx,cy,rAin,rAout,a,b,col));
+    g+=clockTick(cx,cy,rAout,vs,s.von,col)+clockTick(cx,cy,rAout,ve,s.bis,col);
+  }
+  return `<svg width="${sz}" height="${sz}" viewBox="-6 -6 ${sz+12} ${sz+12}" style="vertical-align:middle" aria-label="day clock">${g}</svg>`;
+}
 function calcMonth(m, emp){
   emp = emp || empFilter;
   const E = empById(emp);
@@ -594,6 +782,24 @@ function calcMonth(m, emp){
 }
 
 // ---- tax & social security estimate (uses YOUR observed rates + §32a EStG formula, 2024 constants, applied monthly) ----
+// ===== Leave (Urlaub) account: 30 days/yr + carry-forward with a cutoff; each leave day = 4 h credited =====
+function leaveStatus(year){
+  year = String(year);
+  const annual   = S.leaveAnnual   != null ? S.leaveAnnual   : 30;
+  const carry    = S.leaveCarry    != null ? S.leaveCarry    : 5;
+  const cutoff   = S.leaveCarryCutoff || (year+"-03-31");
+  const usedPrior= S.leaveUsedPrior!= null ? S.leaveUsedPrior : 7;
+  // distinct calendar days logged as U (vacation) in this year
+  const uDates = new Set(shifts.filter(s=>s.art==="U" && s.date.slice(0,4)===year).map(s=>s.date));
+  const loggedU = uDates.size;
+  const used = usedPrior + loggedU;
+  const carryExpired = cutoff && todayStr() > cutoff;
+  // use-it-or-lose-it: once the cutoff passes, unused carry is forfeited
+  const carryUsable = carryExpired ? Math.min(carry, used) : carry;
+  const total = annual + carryUsable;
+  return { year, annual, carry, cutoff, usedPrior, loggedU, used, total, remaining: total-used, carryExpired, hoursPerDay:4 };
+}
+function saveLeaveSetting(k,v){ S[k]= (k==="leaveCarryCutoff"? v : Number(v)); persistS(); render(); }
 function taxEstimate(brutto){
   const t = S.tax;
   const rv = brutto * t.rv/100, av = brutto * t.av/100, pv = brutto * t.pv/100, kv = brutto * t.kv/100;
@@ -715,7 +921,7 @@ function fillSelects(){
   $("f-emp").innerHTML = S.employers.map(e=>`<option value="${e.id}">${e.name}${e.type==="minijob"?" (minijob)":""}</option>`).join("");
   $("f-emp").value = empFilter;
   $("f-boss").innerHTML = '<option value="">– planned / nobody –</option>' + S.bosses.map(b=>`<option>${b}</option>`).join("");
-  $("f-kunde").innerHTML = S.customers.map(c=>`<option value="${c[0]}" data-km="${c[1]}" data-min="${c[2]}">${c[0]} (${c[1]} km)</option>`).join("");
+  $("f-kunde").innerHTML = S.customers.map(c=>`<option value="${c[0]}" data-km="${c[1]}" data-min="${c[2]}">${c[0]}</option>`).join("");
   $("f-kunde").onchange = e => {
     $("f-km").value = e.target.selectedOptions[0].dataset.km;
     $("f-min").value = e.target.selectedOptions[0].dataset.min;
@@ -825,22 +1031,83 @@ const planKey = e => `${e.date}|${e.von}|${e.bis}|${e.art}|${(e.kunde||"").toLow
 // looser identity: one person cannot have two plan shifts starting AND ending at the same time on the same day
 const slotKey = o => `${o.emp||"fib"}|${o.date}|${o.von}|${o.bis}`;
 function importEntries(entries){
-  let added=0, skipped=0, months={};
+  let added=0, skipped=0, months={}, takeovers=0;
+  const choice = ($("planVersionSel") && $("planVersionSel").value) || "auto";
   const existing = new Set(shifts.filter(s=>s.src==="plan").map(slotKey));
+  const monthsIn = new Set(entries.map(e=>e.date.slice(0,7)));
+  // A "revised" import = user picked Revised, OR (auto) a SOLL already exists for a month in this import.
+  const isRevised = choice==="Revised" ||
+    (choice==="auto" && [...monthsIn].some(mo=>planVersions.some(v=>v.month===mo && v.label==="Soll Plan")));
   for(const e of entries){
     months[e.date.slice(0,7)]=1;
     const ek = slotKey({emp:"fib", ...e});
-    if(existing.has(ek)){ skipped++; continue; }
+    if(existing.has(ek)){ skipped++; continue; }   // duplicate of the SOLL (or an earlier import) → skip
     existing.add(ek);
     plan.push({ emp:"fib", ...e });
     const c = matchCustomer(e.kunde);
-    const ns = { emp:"fib", date:e.date, von:e.von, bis:e.bis, art:e.art, boss:"", kunde:e.kunde,
-      vg: e.vg, km: 0, min: 0, kmSuggest: c?c[1]:0, ueb:"nein", note:"from plan", src:"plan" };
+    // SOLL plan = base contract hours (fixed salary, no +30 %). Anything NEW that arrives in a revised
+    // plan (or a spontaneous call) is a shift TAKEOVER → +30 %.
+    const worked = e.art!=="U" && e.art!=="K" && !STANDBY.includes(e.art);
+    const takeover = isRevised && worked;
+    if(takeover) takeovers++;
+    const ns = { emp:"fib", date:e.date, von:e.von, bis:e.bis, art:e.art,
+      boss: takeover ? "" : "Soll Plan", kunde:e.kunde, vg: e.vg,
+      km: c?c[1]:0, min: c?c[2]:0, kmSuggest: c?c[1]:0,
+      ueb: takeover ? "ja" : "nein", takeover: takeover, planKind: isRevised?"revised":"soll",
+      note: takeover ? "revised takeover (+30 %)" : "from plan", src:"plan" };
     shifts.push(ns); cloudPush(ns);
     added++;
   }
   save();
-  return { added, skipped, months:Object.keys(months) };
+  snapshotPlanVersion(entries);
+  return { added, skipped, months:Object.keys(months), takeovers, revised:isRevised };
+}
+// ===== Schedule versions: keep every import as Soll Plan / Revision 1,2,… (never overwrites actual shifts) =====
+function snapshotPlanVersion(entries){
+  const byMonth={};
+  entries.forEach(e=>{ const k=e.date.slice(0,7); if(!byMonth[k]) byMonth[k]=[];
+    byMonth[k].push({date:e.date, von:e.von, bis:e.bis, art:e.art, kunde:e.kunde||"", vg:e.vg}); });
+  const choice = ($("planVersionSel") && $("planVersionSel").value) || "auto";
+  Object.keys(byMonth).forEach(mo=>{
+    const prior = planVersions.filter(v=>v.month===mo).length;
+    let label;
+    if(choice==="SOLL Plan") label = "Soll Plan";
+    else if(choice==="Revised") label = "Revision " + (prior>0?prior:1);
+    else label = prior===0 ? "Soll Plan" : "Revision " + prior;   // auto
+    planVersions.push({ month:mo, label, when:new Date().toISOString(), entries:byMonth[mo] });
+  });
+  savePlanVersions();
+}
+function planVersionDiff(oldV,newV){
+  const key=e=>e.date+"|"+e.von+"|"+e.bis;
+  const om=new Map(oldV.entries.map(e=>[key(e),e])), nm=new Map(newV.entries.map(e=>[key(e),e]));
+  const added=[], removed=[], changed=[];
+  nm.forEach((e,k)=>{ if(!om.has(k)) added.push(e); else { const o=om.get(k); if((o.kunde||"")!==(e.kunde||"")||o.art!==e.art) changed.push({o,e}); } });
+  om.forEach((e,k)=>{ if(!nm.has(k)) removed.push(e); });
+  return {added,removed,changed};
+}
+function renderPlanVersions(){
+  const el=$("planVersions"); if(!el) return;
+  if(!planVersions.length){ el.innerHTML='<p class="muted">No plan versions yet. Importing a schedule saves it here as “Soll Plan”; later imports for the same month become Revision 1, 2, … — the original is never overwritten, and your actual logged shifts stay separate.</p>'; return; }
+  const months=[...new Set(planVersions.map(v=>v.month))].sort().reverse();
+  el.innerHTML = months.map(mo=>{
+    const vers=planVersions.filter(v=>v.month===mo);
+    let h=`<h3 style="margin-top:0">🗓️ ${mo} — ${vers.length} version${vers.length>1?"s":""}</h3>`;
+    vers.forEach((v,idx)=>{
+      h+=`<div class="sumline"><span><b>${v.label}</b> · ${new Date(v.when).toLocaleString("de-DE",{dateStyle:"short",timeStyle:"short"})} · ${v.entries.length} shifts</span></div>`;
+      if(idx>0){
+        const d=planVersionDiff(vers[idx-1], v);
+        if(d.added.length||d.removed.length||d.changed.length){
+          h+=`<div style="padding-left:10px;font-size:11.5px">`;
+          d.added.forEach(e=>h+=`<div class="cmp-add">+ added ${e.date.slice(8)}.${e.date.slice(5,7)}. ${e.von}–${e.bis} ${esc(e.kunde||e.art)}</div>`);
+          d.removed.forEach(e=>h+=`<div class="cmp-del">− removed ${e.date.slice(8)}.${e.date.slice(5,7)}. ${e.von}–${e.bis} ${esc(e.kunde||e.art)}</div>`);
+          d.changed.forEach(c=>h+=`<div class="cmp-chg">~ changed ${c.e.date.slice(8)}.${c.e.date.slice(5,7)}. ${c.e.von}–${c.e.bis}: ${esc(c.o.kunde||c.o.art)} → ${esc(c.e.kunde||c.e.art)}</div>`);
+          h+=`</div>`;
+        } else h+=`<div class="muted" style="padding-left:10px">no changes vs ${vers[idx-1].label}</div>`;
+      }
+    });
+    return `<div class="card">${h}</div>`;
+  }).join("");
 }
 function toast(msg){
   let t = document.querySelector(".toast");
@@ -903,6 +1170,18 @@ async function importPdf(inp){
   }
   inp.value="";
 }
+function loadAugSoll(){
+  if($("planVersionSel")) $("planVersionSel").value = "SOLL Plan";
+  const r = importEntries(parsePlanText(AUG_SOLL));
+  $("planResult").textContent = `✓ August SOLL plan — ${r.added} base shifts imported, ${r.skipped} already there.`;
+  toast(r.added ? `✓ August SOLL — ${r.added} shifts` : "August SOLL already imported"); lockImportBtns(); render();
+}
+function loadAugRevised(){
+  if($("planVersionSel")) $("planVersionSel").value = "Revised";
+  const r = importEntries(parsePlanText(AUG_REVISED));
+  $("planResult").textContent = `✓ August REVISED — ${r.added} new shifts (${r.takeovers} takeovers +30 %), ${r.skipped} SOLL duplicates skipped.`;
+  toast(`✓ Revised — ${r.takeovers} takeover shifts (+30 %)`); lockImportBtns(); render();
+}
 function loadJuly(){
   const r = importEntries(parsePlanText(JULY_PLAN));
   $("planResult").textContent = `✓ Done: July 2026 plan — ${r.added} new entries, ${r.skipped} duplicates skipped.`;
@@ -945,29 +1224,297 @@ function empBarHTML(target){
   return S.employers.map(e=>`<button class="${e.id===empFilter?'act':''}" onclick="setEmp('${e.id}')">${e.name}</button>`).join("");
 }
 function setEmp(id){ empFilter=id; render(); }
+/* ================= LIVE SHIFT TRACKER (Phase 1) ================= */
+let live = JSON.parse(localStorage.getItem("fibLive")||"null") || { active:null, queue:[], reviewing:false };
+if(!live.queue) live.queue=[];
+let repFilter = {cust:"",type:"",status:""};
+let planVersions = JSON.parse(localStorage.getItem("fibPlanVersions")||"[]");
+function savePlanVersions(){ localStorage.setItem("fibPlanVersions", JSON.stringify(planVersions)); }
+function saveLive(){ localStorage.setItem("fibLive", JSON.stringify(live)); }
+
+// one-time NON-destructive backup snapshot before the tracker layer is introduced
+(function backupOnce(){ try{
+  if(!localStorage.getItem("fibSchemaV")){
+    localStorage.setItem("fibBackup_preLive", JSON.stringify({when:new Date().toISOString(), S, shifts, plan}));
+    localStorage.setItem("fibSchemaV","2");
+  }
+}catch(e){} })();
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function nowHM(){ const d=new Date(); return pad2(d.getHours())+":"+pad2(d.getMinutes()); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function fmtElapsed(ms){ if(ms<0)ms=0; const s=Math.floor(ms/1000); return pad2(Math.floor(s/3600))+"h "+pad2(Math.floor(s%3600/60))+"m "+pad2(s%60)+"s"; }
+function fmtCountdown(ms){ const past=ms<0; let m=Math.round(Math.abs(ms)/60000); const h=Math.floor(m/60); m=m%60; return (past?"":"")+(h>0?h+"h ":"")+m+"m"; }
+function shiftLabel(d){ return (d.kunde && d.kunde.trim()) || d.art || "shift"; }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function readForm(){
+  return { emp:$("f-emp").value, date:$("f-date").value||todayStr(), von:$("f-von").value, bis:$("f-bis").value,
+    art:$("f-art").value, boss:$("f-boss").value, kunde:$("f-kunde").value,
+    km:Number($("f-km").value||0), min:Number($("f-min").value||0), ueb:$("f-ueb").value, note:$("f-note").value,
+    src: (editIndex!==null && shifts[editIndex]) ? shifts[editIndex].src : "manual" };
+}
+function formOK(){ if(!$("f-date").value){ alert("Pick a date first."); return false; } return true; }
+
+// --- start / queue from the form ---
+function startFromForm(){
+  if(!formOK()) return;
+  if(live.active){ if(!confirm("A shift is already running. Add this one to the queue instead?")) return; return queueFromForm(); }
+  const d = readForm();
+  live.active = { ...d, actualStart: nowHM(), startedTs: Date.now(), journeyOut:null };
+  live.reviewing=false; saveLive(); toast("▶ Shift started"); render();
+  setTimeout(()=>{ const el=$("liveCard"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); },40);
+}
+function queueFromForm(){
+  if(!formOK()) return;
+  live.queue.push(readForm()); saveLive(); toast("📋 Queued as upcoming"); render();
+}
+
+// --- active shift controls ---
+function beginReview(){ if(!live.active) return; live.reviewing=true; live.active.reviewEnd = live.active.reviewEnd || nowHM(); saveLive(); render();
+  setTimeout(()=>{ const el=$("liveCard"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); },40); }
+function cancelReview(){ live.reviewing=false; saveLive(); render(); }
+function confirmEnd(){
+  const a = live.active; if(!a) return;
+  const end = ($("rv-end") && $("rv-end").value) || nowHM();
+  let km  = $("rv-km") ? Number($("rv-km").value||0) : Number(a.km||0);
+  const min = $("rv-min") ? Number($("rv-min").value||0) : Number(a.min||0);
+  const os = $("rv-odo-s") ? Number($("rv-odo-s").value||0) : 0, oe = $("rv-odo-e") ? Number($("rv-odo-e").value||0) : 0;
+  if(os>0 && oe>os) km = oe-os;   // odometer difference wins when both are filled
+  if(os>0 && oe>0 && oe<os && !confirm("End odometer is lower than start odometer. Save anyway?")) return;
+  const jFrom = $("rv-origin") ? $("rv-origin").value : (a.journeyFrom||"Home");
+  const rTrip = $("rv-return") ? $("rv-return").value!=="0" : true;
+  const note= $("rv-note") ? $("rv-note").value : (a.note||"");
+  // build a normal completed shift — actual worked times become von/bis (pay-relevant); planned kept for future reporting
+  const sh = { emp:a.emp, date:a.date, von:a.actualStart, bis:end, art:a.art, boss:a.boss, kunde:a.kunde,
+    km, min, odoStart:os||null, odoEnd:oe||null, journeyFrom:jFrom, returnTrip:rTrip, journeyOut:a.journeyOut||null, ueb:a.ueb||"auto", note, src:a.src||"manual",
+    plannedVon:a.von, plannedBis:a.bis, actualStart:a.actualStart, actualEnd:end, tracked:true };
+  if(sh.ueb==="auto" && (STANDBY.includes(sh.art) || sh.art==="U" || sh.art==="K")) sh.ueb="nein";
+  if(STANDBY.includes(sh.art)){ const pe={emp:sh.emp,date:sh.date,von:sh.von,bis:sh.bis,art:sh.art,kunde:sh.kunde||""};
+    if(!plan.some(p=>planKey(p)===planKey(pe))) plan.push(pe); }
+  shifts.push(sh); save(); cloudPush(sh);
+  empFilter = sh.emp; currentMonth = sh.date.slice(0,7);
+  live.active=null; live.reviewing=false; saveLive();
+  toast("✓ Shift saved"); render();
+  setTimeout(()=>{ const el=$("miniList"); if(el){ const f=el.querySelector(".mini-item"); if(f){ f.classList.add("flash"); f.scrollIntoView({behavior:"smooth",block:"nearest"}); } } },80);
+}
+function cancelActive(){ if(!live.active) return; if(!confirm("Discard the running shift without saving?")) return;
+  live.active=null; live.reviewing=false; saveLive(); toast("Active shift discarded"); render(); }
+function activeStartJourney(){ if(!live.active) return; live.active.journeyOut={startTs:Date.now(), startHM:nowHM(), arriveHM:null};
+  saveLive(); toast("🚗 Journey started"); render(); }
+function activeArrive(){ if(!live.active||!live.active.journeyOut) return; live.active.journeyOut.arriveHM=nowHM();
+  live.active.journeyOut.arriveTs=Date.now(); saveLive(); render(); }
+
+// --- queue controls ---
+function startQueued(i){ const q=live.queue[i]; if(!q) return;
+  if(live.active){ alert("Finish the running shift first (End shift → Confirm & save), then start this one."); return; }
+  live.queue.splice(i,1);
+  live.active = { ...q, actualStart: nowHM(), startedTs: Date.now(), journeyOut:null }; live.reviewing=false;
+  saveLive(); toast("▶ Started next shift"); render(); }
+function editQueued(i){ const q=live.queue[i]; if(!q) return;
+  $("f-emp").value=q.emp||"fib"; onEmpChange();
+  $("f-date").value=q.date; $("f-von").value=q.von; $("f-bis").value=q.bis; $("f-art").value=q.art;
+  $("f-boss").value=q.boss||""; $("f-kunde").value=q.kunde||""; $("f-km").value=q.km||0; $("f-min").value=q.min||0;
+  $("f-ueb").value=(q.ueb==="ja"||q.ueb==="nein")?q.ueb:"auto"; $("f-note").value=q.note||"";
+  live.queue.splice(i,1); saveLive(); toast("Loaded into form — edit, then Queue or Start"); render(); window.scrollTo(0,0); }
+function delQueued(i){ live.queue.splice(i,1); saveLive(); render(); }
+function moveQueued(i,dir){ const j=i+dir; if(j<0||j>=live.queue.length) return;
+  const t=live.queue[i]; live.queue[i]=live.queue[j]; live.queue[j]=t; saveLive(); render(); }
+
+// --- planned shifts from the imported schedule + unified "due" list ---
+function slotKey2(x){ return (x.emp||"fib")+"|"+x.date+"|"+x.von+"|"+x.bis; }
+function planByKey(k){ return plan.find(p=>slotKey2(p)===k); }
+function plannedDueList(){
+  const now=Date.now(), winH=Number(S.prepWindowH||2);
+  const activeKey = live.active ? slotKey2(live.active) : null;
+  const qKeys = new Set(live.queue.map(slotKey2));
+  const doneKeys = new Set();
+  shifts.forEach(s=>{ doneKeys.add(slotKey2(s)); if(s.plannedVon&&s.plannedBis) doneKeys.add((s.emp||"fib")+"|"+s.date+"|"+s.plannedVon+"|"+s.plannedBis); });
+  const out=[];
+  for(const p of plan){
+    if(p.art==="U"||p.art==="K") continue;
+    const startMs=Date.parse(p.date+"T"+p.von); if(isNaN(startMs)) continue;
+    const diff=startMs-now;
+    if(diff> winH*3600000 || diff < -12*3600000) continue;               // only within the prep window ahead / recently overdue
+    const k=slotKey2(p);
+    if(k===activeKey || qKeys.has(k) || doneKeys.has(k)) continue;        // skip active / already-queued / already-logged
+    out.push({src:"plan", key:k, s:p, start:startMs, diff});
+  }
+  return out;
+}
+function dueList(){
+  const now=Date.now();
+  const q = live.queue.map((s,i)=>{ const st=Date.parse(s.date+"T"+s.von); return {src:"queue", i, s, start:isNaN(st)?Infinity:st, diff:isNaN(st)?null:st-now}; });
+  const merged = q.concat(plannedDueList());
+  merged.sort((a,b)=>a.start-b.start);
+  return merged;
+}
+function makeActiveFrom(d, work){
+  return { emp:d.emp||"fib", date:d.date, von:d.von, bis:d.bis, art:d.art, kunde:d.kunde||"", boss:d.boss||"",
+    km:Number(d.km||0), min:Number(d.min||0), ueb:d.ueb||"auto", note:d.note||"", src:d.src||"manual",
+    journeyOut:null, startedTs: work?Date.now():null, actualStart: work?nowHM():null };
+}
+function startPlanned(k){ if(live.active){ alert("Finish the running shift first (End shift → Confirm & save)."); return; }
+  const p=planByKey(k); if(!p) return; live.active=makeActiveFrom({...p, src:"plan"}, true); live.reviewing=false;
+  saveLive(); toast("▶ Started planned shift"); render(); }
+function journeyPlanned(k){ if(live.active){ alert("Finish the running shift first."); return; }
+  const p=planByKey(k); if(!p) return; live.active=makeActiveFrom({...p, src:"plan"}, false);
+  live.active.journeyOut={startTs:Date.now(), startHM:nowHM(), arriveHM:null};
+  saveLive(); toast("🚗 Journey started — press ▶ Start shift when you begin work"); render(); }
+function editPlanned(k){ const p=planByKey(k); if(!p) return;
+  $("f-emp").value=p.emp||"fib"; onEmpChange(); $("f-date").value=p.date; $("f-von").value=p.von; $("f-bis").value=p.bis; $("f-art").value=p.art;
+  $("f-boss").value=""; $("f-kunde").value=p.kunde||""; $("f-km").value=0; $("f-min").value=0; $("f-ueb").value="auto"; $("f-note").value="";
+  toast("Loaded planned shift into form — edit, then Start or Queue"); window.scrollTo(0,0); }
+function journeyQueued(i){ if(live.active){ alert("Finish the running shift first."); return; }
+  const q=live.queue[i]; if(!q) return; live.queue.splice(i,1);
+  live.active=makeActiveFrom(q, false); live.active.journeyOut={startTs:Date.now(), startHM:nowHM(), arriveHM:null};
+  saveLive(); toast("🚗 Journey started — press ▶ Start shift when you begin work"); render(); }
+function beginWork(){ if(!live.active) return; live.active.startedTs=Date.now(); live.active.actualStart=nowHM();
+  saveLive(); toast("▶ Shift started"); render(); }
+
+// --- render the live card ---
+function overlapWarn(a,b){ if(!a||!b) return false;
+  const aEnd=Date.parse(a.date+"T"+a.bis), bStart=Date.parse(b.date+"T"+b.von);
+  return !isNaN(aEnd)&&!isNaN(bStart)&&bStart<aEnd; }
+function renderLive(){
+  const el=$("liveCard"); if(!el) return;
+  const winH=Number(S.prepWindowH||2);
+  const a=live.active;
+  let H="";
+  if(a){
+    const jo=a.journeyOut, working=!!a.startedTs;
+    const jline = jo ? (jo.arriveHM? `🚗 Journey ${jo.startHM}→${jo.arriveHM}` : `🚗 Journey started ${jo.startHM} · <a href="#" onclick="activeArrive();return false">Arrived now</a>`)
+                     : `🚗 Journey: not started · <a href="#" onclick="activeStartJourney();return false">Start journey</a>`;
+    const cls = working ? "live-active" : "live-next";
+    const pill = working ? `<span class="st-pill st-active">● ACTIVE SHIFT</span>` : `<span class="st-pill st-journey">🚗 GETTING READY</span>`;
+    const tStart = working ? a.startedTs : (jo ? jo.startTs : Date.now());
+    const tRun = (working || jo) ? 1 : 0;
+    H += `<div class="card ${cls} live-wrap"><div class="live-head">
+        <div>${pill}
+          <div class="live-cust">${esc(shiftLabel(a))}</div>
+          <div class="live-meta">Planned ${a.von}–${a.bis}${working?` · started ${a.actualStart}`:""} · ${esc(a.art)}${a.boss?` · ${esc(a.boss)}`:""}</div>
+          <div class="live-meta">${jline}</div></div>
+        <div style="text-align:right"><div class="live-timer" id="liveTimer" data-start="${tStart}" data-run="${tRun}">00h 00m 00s</div>
+          <div class="muted">${working?"working":(jo?"traveling":"ready")}</div></div></div>`;
+    if(working && live.reviewing){
+      H += `<div class="reviewbox"><b>Review &amp; save</b>
+        <div class="pa-grid"><div class="h"></div><div class="h">Planned</div><div class="h">Actual</div>
+          <div class="l">Start</div><div>${a.von}</div><div>${a.actualStart}</div>
+          <div class="l">End</div><div>${a.bis}</div><div><input type="time" id="rv-end" value="${a.reviewEnd||nowHM()}" style="padding:6px"></div></div>
+        <div class="row stackable"><div><label>Start odometer</label><input type="number" id="rv-odo-s" value="${a.odoStart||''}" min="0" placeholder="optional"></div>
+          <div><label>End odometer</label><input type="number" id="rv-odo-e" value="${a.odoEnd||''}" min="0" placeholder="optional"></div></div>
+        <div class="row stackable"><div><label>Drive km (round trip)</label><input type="number" id="rv-km" value="${a.km||0}" min="0"></div>
+          <div><label>Travel min (round trip)</label><input type="number" id="rv-min" value="${a.min||0}" min="0"></div></div>
+        <div class="row stackable"><div><label>Journey from</label><select id="rv-origin"><option ${(!a.journeyFrom||a.journeyFrom==="Home")?"selected":""}>Home</option><option ${a.journeyFrom==="Previous customer"?"selected":""}>Previous customer</option><option ${a.journeyFrom==="Current location"?"selected":""}>Current location</option><option ${a.journeyFrom==="Custom"?"selected":""}>Custom</option></select></div>
+          <div><label>Trip type</label><select id="rv-return"><option value="1" ${a.returnTrip!==false?"selected":""}>Round trip</option><option value="0" ${a.returnTrip===false?"selected":""}>One way</option></select></div></div>
+        <div class="muted">Fill both odometers and km is taken from their difference. Origin matters when you drive customer→customer instead of returning home.</div>
+        <label>Note</label><input type="text" id="rv-note" value="${esc(a.note)}">
+        <button class="btn grn" onclick="confirmEnd()">✓ Confirm &amp; save shift</button>
+        <button class="btn ghost tiny" onclick="cancelReview()">Keep running</button></div>`;
+    } else if(working){
+      H += `<div style="margin-top:-4px"><button class="btn grn tiny" onclick="beginReview()">■ End shift</button>
+        <button class="btn ghost tiny" onclick="cancelActive()">Discard</button></div>`;
+    } else {
+      H += `<div style="margin-top:-4px"><button class="btn grn tiny" onclick="beginWork()">▶ Start shift (begin work)</button>
+        ${jo?"":`<button class="btn ghost tiny" onclick="activeStartJourney()">🚗 Start journey</button>`}
+        <button class="btn ghost tiny" onclick="cancelActive()">Discard</button></div>`;
+    }
+  }
+  const due = dueList();
+  if(!a && due.length){
+    const it=due[0];
+    const soon = it.diff!=null && it.diff<=winH*3600000;
+    const cd = it.diff!=null ? (it.diff<0?"overdue by "+fmtCountdown(it.diff):"starts in "+fmtCountdown(it.diff)) : "";
+    const nb = it.src==="queue"
+      ? `<button class="btn grn tiny" onclick="startQueued(${it.i})">▶ Start shift</button> <button class="btn ghost tiny" onclick="journeyQueued(${it.i})">🚗 Start journey</button> <button class="btn ghost tiny" onclick="editQueued(${it.i})">Edit</button>`
+      : `<button class="btn grn tiny" onclick="startPlanned('${it.key}')">▶ Start shift</button> <button class="btn ghost tiny" onclick="journeyPlanned('${it.key}')">🚗 Start journey</button> <button class="btn ghost tiny" onclick="editPlanned('${it.key}')">Edit</button>`;
+    H += `<div class="card live-next live-wrap"><span class="st-pill st-due">${soon?"NEXT SHIFT — DUE SOON":"NEXT SHIFT"}</span>
+        <div class="live-cust">${esc(shiftLabel(it.s))}</div>
+        <div class="live-meta">${it.s.date} · ${it.s.von}–${it.s.bis} · ${esc(it.s.art)}${it.s.boss?` · ${esc(it.s.boss)}`:""} · <span class="live-count">${cd}</span></div>
+        <div class="live-meta muted">${it.src==="plan"?"from your plan (Soll)":"queued manually"}</div>
+        <div style="margin-top:5px">${nb}</div></div>`;
+  }
+  const rest = a ? due : due.slice(1);
+  if(rest.length){
+    H += `<div class="card live-wrap"><h2>🗒️ Coming up (${rest.length})</h2>`;
+    rest.forEach(it=>{
+      const soon = it.diff!=null && it.diff<=winH*3600000 && it.diff>-12*3600000;
+      const cd = it.diff!=null ? `<span class="${soon?"live-count":"muted"}">${it.diff<0?"overdue "+fmtCountdown(it.diff):"in "+fmtCountdown(it.diff)}</span>` : "";
+      const ov = a && overlapWarn(a,it.s) ? ` <span class="st-pill st-due" title="Overlaps the running shift">⚠ overlaps</span>` : "";
+      const ctl = it.src==="queue"
+        ? `${!a?`<button class="btn grn tiny" onclick="startQueued(${it.i})">▶ Start</button>`:""} <button class="btn ghost tiny" onclick="editQueued(${it.i})">Edit</button> <button class="btn ghost tiny" onclick="moveQueued(${it.i},-1)">↑</button> <button class="btn ghost tiny" onclick="moveQueued(${it.i},1)">↓</button> <button class="btn ghost tiny" onclick="delQueued(${it.i})">✕</button>`
+        : `${!a?`<button class="btn grn tiny" onclick="startPlanned('${it.key}')">▶ Start</button>`:""} <button class="btn ghost tiny" onclick="editPlanned('${it.key}')">Edit</button>`;
+      H += `<div class="qitem"><div class="qinfo"><b>${esc(shiftLabel(it.s))}</b> <span class="st-pill ${soon?"st-due":"st-queued"}">${soon?"DUE SOON":(it.src==="plan"?"Plan":"Queued")}</span>${ov}
+          <span>${it.s.date} · ${it.s.von}–${it.s.bis} · ${esc(it.s.art)}${it.s.boss?` · ${esc(it.s.boss)}`:""} · ${cd}</span></div>
+        <div class="qbtns">${ctl}</div></div>`;
+    });
+    H += `</div>`;
+  }
+  if(!a && !due.length){
+    H += `<div class="card live-none live-wrap"><span class="muted">No shift running and nothing due.</span> Fill the form below, then <b>▶ Start shift now</b> or <b>📋 Queue</b> it. The timer survives refresh. Shifts from your imported plan appear here automatically within the prep window before they start.</div>`;
+  }
+  H += `<div class="muted" style="margin:2px 2px 12px">⏱ Auto‑show the next shift <input type="number" style="width:52px;display:inline;padding:3px 4px;font-size:12px" min="0.5" step="0.5" value="${winH}" onchange="S.prepWindowH=Number(this.value)||2; persistS(); renderLive();"> h before it starts.</div>`;
+  el.innerHTML=H; tickTimer();
+}
+function tickTimer(){ const t=$("liveTimer"); if(t && t.dataset.run==="1"){ t.textContent = fmtElapsed(Date.now()-Number(t.dataset.start)); } }
+if(typeof _liveTimerInt==="undefined"){ var _liveTimerInt=setInterval(tickTimer,1000); }
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && typeof renderLive==="function") renderLive(); });
+
 function render(){
+  if(typeof renderLive==="function") renderLive();
   const m = currentMonth;
   $("viewMonth").value = m; $("repMonth").value = m; $("hdrMonth").textContent = `· ${empName(empFilter)} · ${m}`;
   if($("empBarMonth")) $("empBarMonth").innerHTML = empBarHTML();
   if($("empBarList")) $("empBarList").innerHTML = empBarHTML();
   const rows = shifts.map((s,i)=>({s,i})).filter(x=>x.s.date.slice(0,7)===m && x.s.emp===empFilter)
     .sort((a,b)=>a.s.date.localeCompare(b.s.date)||a.s.von.localeCompare(b.s.von));
-  let html = "<tr><th>Date</th><th>Time</th><th>Type</th><th>Customer / Notes</th><th>Called by</th><th class='num'>km</th><th></th></tr>";
-  for(const {s,i} of rows){
-    const a = analyse(s);
-    const pill = s.art==="U"||s.art==="K" ? "p-url" : a.isBer ? "p-ber" : (s.art==="DÜ"||a.ueb) ? "p-ueb" : "p-plan";
+  // report filters (affect the table only, not the month totals)
+  if($("repFilters")){
+    const mine = shifts.filter(s=>s.date.slice(0,7)===m && s.emp===empFilter);
+    const custs=[...new Set(mine.map(s=>s.kunde).filter(Boolean))].sort();
+    const types=[...new Set(mine.map(s=>s.art))].sort();
+    $("repFilters").innerHTML =
+      `<select onchange="repFilter.cust=this.value;render()"><option value="">All customers</option>${custs.map(c=>`<option ${repFilter.cust===c?"selected":""}>${esc(c)}</option>`).join("")}</select>`+
+      `<select onchange="repFilter.type=this.value;render()"><option value="">All types</option>${types.map(t=>`<option ${repFilter.type===t?"selected":""}>${esc(t)}</option>`).join("")}</select>`+
+      `<label style="display:inline;align-self:center;font-size:11px;color:#666;margin-left:4px">Net ≈ <input type="number" style="width:50px;padding:5px;display:inline" min="40" max="100" step="1" value="${Math.round((S.netFactor||0.80)*100)}" onchange="S.netFactor=Number(this.value)/100; persistS(); render()">% of gross</label>`+
+      ((repFilter.cust||repFilter.type)?`<button class="btn ghost tiny" onclick="repFilter={cust:'',type:'',status:''};render()">Clear filters</button>`:"");
+  }
+  let frows = rows;
+  if(repFilter.cust) frows = frows.filter(x=>(x.s.kunde||"")===repFilter.cust);
+  if(repFilter.type) frows = frows.filter(x=>x.s.art===repFilter.type);
+  const wdEN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const nz = v => v>0.009 ? v.toFixed(1) : '<span class="muted">—</span>';
+  const umbrellaOf = s => rows.map(x=>x.s).find(o=> o!==s && STANDBY.includes(o.art) && (o.emp||"fib")===(s.emp||"fib") && overlapMin(...shiftAbs(o),...shiftAbs(s))>0);
+  let html = `<tr><th></th><th>Day / Date · time</th><th>Type</th><th>Customer · Note</th><th>Called by</th><th class="num">Cred</th><th class="num">Night</th><th class="num">Sat</th><th class="num">Sun</th><th class="num">Hol</th><th class="num">+30%</th><th class="num">km</th><th class="num">Gross / Net</th><th></th></tr>`;
+  for(const {s,i} of frows){
+    const a = analyse(s), pay = shiftPay(s), isUK = s.art==="U"||s.art==="K";
+    const pill = isUK ? "p-url" : a.isBer ? "p-ber" : (s.art==="DÜ"||a.ueb) ? "p-ueb" : "p-plan";
+    const umb = isUK ? null : umbrellaOf(s);
+    const child = !!umb && !STANDBY.includes(s.art);
+    const acc = isUK ? "acc-url" : a.isBer ? "acc-ber" : child ? "acc-child" : (s.art==="DÜ"||a.ueb) ? "acc-out" : "acc-plan";
     let berTag = "";
-    if(a.isBer){ const used = standbyRealized(s); berTag = ` <span class="pill ${used?'b-real':'b-unused'}">${used?'used':'unused'}</span>`; }
+    if(a.isBer){ const used = standbyRealized(s); berTag = ` <span class="pill ${used?'b-real':'b-unused'}">${used?'placed':'not placed'}</span>`; }
     const partial = a.ueb && a.uebH < a.credit-0.01;
-    html += `<tr><td>${dateLabel(s)}</td><td>${s.von}–${s.bis}</td>
-      <td><span class="pill ${pill}">${s.art}${(a.ueb&&s.art!=="DÜ")?(partial?` +30%(${a.uebH.toFixed(1)}h)`:"+30%"):""}</span>${berTag}</td>
-      <td>${s.kunde||""}${s.note?`<br><span class="muted">${s.note}</span>`:""}</td>
-      <td>${s.emp==="fib" ? `<select onchange="setBoss(${i},this.value)" style="font-size:11px;padding:3px;border:1px solid #ddd;border-radius:6px"><option value="">— called by —</option>${S.bosses.map(b=>`<option ${s.boss===b?"selected":""}>${b}</option>`).join("")}</select>` : "—"}</td>
+    const planTxt = (s.tracked && (s.plannedVon!==s.von || s.plannedBis!==s.bis)) ? `<br><span class="muted">plan ${s.plannedVon}–${s.plannedBis}</span>` : "";
+    let splitTxt = "";
+    if(child){ const [as,ae]=shiftAbs(s),[ws,we]=shiftAbs(umb);
+      const inH=overlapMin(as,ae,ws,we)/60, outH=(ae-as)/60-inH;
+      splitTxt = `<br><span class="muted">↳ under BS ${umb.von}–${umb.bis}: in ${inH.toFixed(1)}h${outH>0.05?` · outside ${outH.toFixed(1)}h`:""}</span>`; }
+    const money = isUK ? "—" : `<b style="color:#b06a00">${eur(pay.gross)}</b><br><b style="color:#2e7d32">${eur(pay.net)}</b>`;
+    html += `<tr class="rep-row"><td class="${acc}" style="padding-left:5px">${dayClock(s)}</td>
+      <td>${child?'<span class="child">↳ </span>':''}<b>${wdEN[dow(s.date)]}</b> ${dateLabel(s)}<br><span class="muted">${s.von}–${s.bis}</span>${planTxt}${splitTxt}</td>
+      <td><span class="pill ${pill}">${s.art}${(a.ueb&&s.art!=="DÜ")?(partial?` +30%(${a.uebH.toFixed(1)}h)`:"+30%"):""}</span>${berTag}${(s.src==="plan"||s.boss==="Soll Plan")?' <span class="pill p-plan" title="from official plan">Soll</span>':''}</td>
+      <td>${esc(s.kunde||"")}${s.note?`<br><span class="muted">${esc(s.note)}</span>`:""}</td>
+      <td>${s.emp==="fib" ? `<select onchange="setBoss(${i},this.value)" style="font-size:11px;padding:3px;border:1px solid #ddd;border-radius:6px"><option value="">— called by —</option><option ${s.boss==="Soll Plan"?"selected":""}>Soll Plan</option>${S.bosses.map(b=>`<option ${s.boss===b?"selected":""}>${esc(b)}</option>`).join("")}</select>` : "—"}</td>
+      <td class="num">${isUK?"—":`<b>${a.credit.toFixed(1)}</b>`}</td>
+      <td class="num">${isUK?"—":nz(a.night)}</td><td class="num">${isUK?"—":nz(a.sat)}</td><td class="num">${isUK?"—":nz(a.sun)}</td><td class="num">${isUK?"—":nz(a.hol)}</td>
+      <td class="num">${a.uebH>0.009?`<span style="color:#c0392b">${a.uebH.toFixed(1)}</span>`:'<span class="muted">—</span>'}</td>
       <td class="num">${s.km||""} <a class="del" href="#" onclick="editKm(${i});return false">✎</a></td>
+      <td class="num">${money}</td>
       <td><a class="del" href="#" onclick="editShift(${i});return false" style="color:#3a7ca5">✏️</a> <a class="del" href="#" onclick="delShift(${i});return false">✕</a></td></tr>`;
   }
   $("shiftTable").innerHTML = html;
-  $("listMonthLabel").textContent = `(${rows.length} entries)`;
+  $("listMonthLabel").textContent = frows.length===rows.length ? `(${rows.length} shifts · Gross=shift value, Net≈after tax)` : `(${frows.length} of ${rows.length} shown)`;
   // live mini-list on Log tab
   $("liveMonthLabel").textContent = `${empName($("f-emp") ? $("f-emp").value : empFilter)} · ${m}`;
   if($("miniList")){
@@ -983,6 +1530,7 @@ function render(){
   }
   if(typeof drawCal === "function" && $("calGrid")) drawCal();
   renderYear();
+  if(typeof renderPlanVersions==="function") renderPlanVersions();
 
   const {T,p,r,E} = calcMonth(m, empFilter);
   // weekly tiles
@@ -1022,6 +1570,12 @@ function render(){
   lim += over.length ? `<div class="warn">⚠️ Week limit ${S.weekLimit} h exceeded: ${over.map(([w,h])=>`week of ${w.slice(8)}.${w.slice(5,7)}. (${hh(h)})`).join(", ")} — check student-work rules!</div>`
                      : `<div class="ok">✓ No week above ${S.weekLimit} h.</div>`;
   lim += `<div class="${sollDiff>0?'warn':'ok'}">Monthly target ~${S.monthSoll} h → ${sollDiff>=0?"+":""}${hh(sollDiff)} ${sollDiff>0?"(extra hours → time account / payout)":""}</div>`;
+  const LV = leaveStatus(currentMonth.slice(0,4));
+  if($("leaveBanner")) $("leaveBanner").innerHTML = `<div style="background:#eee7fb;border-left:5px solid #7d5fd0;border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:13px"><b>🏖️ Leave ${LV.year}:</b> <b style="color:#2e7d32">${LV.remaining} days left</b> — ${LV.used} used of ${LV.total} (${LV.annual}/yr${LV.carry?` + ${LV.carry} carry-over`:""}, ${LV.loggedU} logged here). ${LV.carryExpired?'<span style="color:#c0392b">⚠ carry-over expired</span> · ':""}<span class="muted">adjust the numbers in the Month tab</span></div>`;
+  lim += `<div class="ok" style="background:#f3effc;color:#463a6b;margin-top:8px">
+    <b>🏖️ Leave account ${LV.year}:</b> <b>${LV.used}</b> used of <b>${LV.total}</b> → <b style="color:#2e7d32">${LV.remaining} days left</b>
+    (${LV.annual}/yr${LV.carry?` + ${LV.carry} carry-over`:""}${LV.usedPrior?`, ${LV.usedPrior} used before app`:""}, ${LV.loggedU} logged here). ${LV.carry?`Carry-over must be used by <b>${LV.cutoff}</b>${LV.carryExpired?' — <b style="color:#c0392b">EXPIRED</b>':""}. `:""}Each leave day = ${LV.hoursPerDay} h.
+    <div class="muted" style="margin-top:5px">annual <input type="number" style="width:44px;padding:3px;display:inline" value="${LV.annual}" onchange="saveLeaveSetting('leaveAnnual',this.value)"> · carry <input type="number" style="width:44px;padding:3px;display:inline" value="${LV.carry}" onchange="saveLeaveSetting('leaveCarry',this.value)"> · used-before <input type="number" style="width:44px;padding:3px;display:inline" value="${LV.usedPrior}" onchange="saveLeaveSetting('leaveUsedPrior',this.value)"> · cutoff <input type="date" style="width:135px;padding:3px;display:inline" value="${LV.cutoff}" onchange="saveLeaveSetting('leaveCarryCutoff',this.value)"></div></div>`;
   $("limitBox").innerHTML = lim;
   $("payBreak").innerHTML = payHTML(T,p,r);
   if(p.minijob){
@@ -1157,6 +1711,10 @@ function printBoss(mode){
     const mark = under ? " ★★" : oncall ? " ★" : "";
     const berInfo = a.isBer ? (standbyRealized(s)?" · call received":" · idle") : "";
     const realNote = (s.note && s.note!=="from plan") ? `<br><i>${s.note}</i>` : "";
+    let splitNote = "";
+    if(under){ const umb=shifts.find(o=>o!==s && STANDBY.includes(o.art) && (o.emp||"fib")===(s.emp||"fib") && overlapMin(...shiftAbs(o),...shiftAbs(s))>0);
+      if(umb){ const [as,ae]=shiftAbs(s),[ws,we]=shiftAbs(umb); const inH=overlapMin(as,ae,ws,we)/60, outH=(ae-as)/60-inH;
+        splitNote=`<br><span style="font-size:9px;color:#555">under Bereitschaft ${umb.von}–${umb.bis}: ${inH.toFixed(1)} h inside${outH>0.05?`, ${outH.toFixed(1)} h outside the window`:""}</span>`; } }
     // hours cell — covered standby shows blank/grey for the boss; detailed note only in "me" mode
     let hoursCell = a.credit.toFixed(2);
     if(a.umbrella){
@@ -1169,7 +1727,7 @@ function printBoss(mode){
     }
     const rowStyle = under ? ' class="shaded"' : a.umbrella ? ' style="color:#777"' : '';
     rows += `<tr${rowStyle}><td>${dateLabel(s)}</td><td>${s.von}–${s.bis}</td>
-      <td>${s.art}${mark}</td><td>${s.kunde||(a.isBer||a.umbrella?"Springerbereitschaft":"—")}${berInfo}${realNote}</td>
+      <td>${s.art}${mark}</td><td>${s.kunde||(a.isBer||a.umbrella?"Springerbereitschaft":"—")}${berInfo}${realNote}${splitNote}</td>
       <td class="num">${hoursCell}</td>
       <td class="num">${s.km||0}</td><td class="num">${minH(s.min||0)}</td>
       <td>${s.boss||""}</td></tr>`;
@@ -1190,6 +1748,13 @@ function printBoss(mode){
     <h2>All shifts this month (in time order)</h2>
     <table><tr><th>Date</th><th>Time</th><th>Type</th><th>Customer / Notes</th><th class="num">Hours</th><th class="num">km (rt)</th><th class="num">Travel (rt)</th><th>Called by</th></tr>${rows}
     <tr><th colspan="4">TOTALS (credited hours)</th><th class="num">${(hSum+T.gapH).toFixed(2)}</th><th class="num">${kmSum}</th><th class="num">${minH(minSum)}</th><th></th></tr></table>
+    <h2>Summary</h2>
+    <table>
+      <tr><td>Total working hours (credited) this month</td><td class="num"><b>${(hSum+T.gapH).toFixed(2)} h</b></td></tr>
+      <tr><td>Total travel time</td><td class="num"><b>${minSum} min = ${(minSum/60).toFixed(2)} h</b></td></tr>
+      <tr><td>Total travel distance</td><td class="num"><b>${kmSum} km</b></td></tr>
+      <tr><td>Working days this month</td><td class="num"><b>${T.days.size}</b></td></tr>
+    </table>
     ${foot}
     <p style="margin-top:14px">Signature: ______________________</p>`;
   window.print();
@@ -1611,7 +2176,7 @@ function cloudPushSettings(){ if(!cloud.on && !cloud.calId) return Promise.resol
 $("f-date").value = new Date().toISOString().slice(0,10);
 $("yearScope").value = "fib";
 if($("gClientId")) $("gClientId").value = S.googleClientId||"";
-fillSelects(); renderSettings(); setMonth(currentMonth); drawCal();
+fillSelects(); renderSettings(); setMonth(currentMonth); drawCal(); if(typeof renderLive==="function") renderLive();
 window.__ready = true;
 // auto-reconnect if this device connected before
 if(S.googleClientId && localStorage.getItem("fibG")){ setTimeout(gConnect, 800); }
